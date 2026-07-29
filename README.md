@@ -33,7 +33,7 @@
 请使用 **Root 权限** 登录你的 NAS 终端，执行以下命令即可启动工具箱：
 
 ```bash
-bash <(curl -sL [https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh](https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh))
+bash <(curl -sL https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh)
 ```
 
 运行后将进入交互式主菜单：
@@ -68,7 +68,7 @@ A lightweight system storage and health maintenance toolbox designed for various
 Log in to your NAS terminal with Root privileges and run the following command:
 
 ```bash
-bash <(curl -sL [https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh](https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh))
+bash <(curl -sL https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh)
 ```
 
 ### 📄 License
