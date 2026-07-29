@@ -37,6 +37,7 @@ bash <(curl -sL [https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh]
 ```
 
 运行后将进入交互式主菜单：
+```text
 ==============================================
         NAS 系统存储与健康维护工具箱          
 ==============================================
@@ -44,6 +45,7 @@ bash <(curl -sL [https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh]
   [2] 优化 log 目录位置 (Log-to-RAM 内存缓存)
   [0] 退出工具箱
 ----------------------------------------------
+```
 
 ## 🇬🇧 English
 
