@@ -72,4 +72,4 @@ bash <(curl -sL [https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh]
 ```
 
 ### 📄 License
-This project is licensed under the MIT License《》. Feel free to use, modify, and distribute.
+This project is licensed under the MIT License. Feel free to use, modify, and distribute.
