@@ -34,6 +34,7 @@
 
 ```bash
 bash <(curl -sL [https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh](https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh))
+、、、
 
 运行后将进入交互式主菜单：
 ==============================================
@@ -66,6 +67,7 @@ Log in to your NAS terminal with Root privileges and run the following command:
 
 ```bash
 bash <(curl -sL [https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh](https://gitee.com/hfgang/nas_toolbox/raw/master/nas_toolbox.sh))
+、、、
 
 ### 📄 License
 This project is licensed under the MIT License《》. Feel free to use, modify, and distribute.
