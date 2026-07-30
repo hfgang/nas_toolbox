@@ -4,7 +4,7 @@
 # 适用系统: 群晖 DSM / 飞牛 OS / 通用 Linux NAS
 # 功能描述: 1. 检测内置 eMMC 健康度与寿命 
 #           2. 一键优化 /var/log 目录 (Log-to-RAM)
-#           3. 检查 Log-to-RAM 挂载与占用状态
+#           3. 检查 Log-to-RAM 挂载状态、占用大小及服务健康状态
 #           4. 动态修改内存盘大小
 # ==============================================================================
 
@@ -80,10 +80,10 @@ cmd_check_emmc() {
             0x03) echo "20-30% (健康)" ;;
             0x04) echo "30-40% (健康)" ;;
             0x05) echo "40-50% (健康)" ;;
-            0x06) echo "50-60% (注意，该值越低越好)" ;;
-            0x07) echo "60-70% (注意，该值越低越好)" ;;
-            0x08) echo "70-80% (警告，该值越低越好)" ;;
-            0x09) echo "80-90% (警告，该值越低越好)" ;;
+            0x06) echo "50-60% (注意)" ;;
+            0x07) echo "60-70% (注意)" ;;
+            0x08) echo "70-80% (警告)" ;;
+            0x09) echo "80-90% (警告)" ;;
             0x0A) echo "90-100% (危险，接近寿命终点)" ;;
             *) echo "未知或不支持 ($1)" ;;
         esac
@@ -293,7 +293,8 @@ Description=Log to RAM Service for NAS
 After=network.target local-fs.target
 
 [Service]
-Type=forking
+Type=oneshot
+RemainAfterExit=yes
 ExecStart=$INSTALL_BIN start
 
 [Install]
@@ -320,26 +321,48 @@ EOF
 }
 
 # ==============================================================================
-# 功能模块 3：检查 Log-to-RAM 状态与占用
+# 功能模块 3：检查 Log-to-RAM 状态、占用及服务健康情况
 # ==============================================================================
 cmd_check_status() {
     echo -e "\n${BLUE}==============================================${NC}"
-    echo -e "${BLUE}        Log-to-RAM 运行状态与空间占用检查       ${NC}"
+    echo -e "${BLUE}    Log-to-RAM 运行状态、占用及服务健康检查    ${NC}"
     echo -e "${BLUE}==============================================${NC}"
 
-    if ! grep -q " /var/log " /proc/mounts; then
-        echo -e "${YELLOW}⚠️ 当前 /var/log 未挂载到内存中 (未启用 Log-to-RAM)。${NC}"
+    # 1. 检查 Systemd 开机自启服务状态
+    echo -e "⚙️ Systemd 服务状态 (log2ram.service):"
+    if command -v systemctl &> /dev/null; then
+        if systemctl list-unit-files | grep -q "log2ram.service"; then
+            srv_status=$(systemctl is-active log2ram.service 2>/dev/null)
+            srv_enabled=$(systemctl is-enabled log2ram.service 2>/dev/null)
+            if [ "$srv_status" = "active" ]; then
+                echo -e "   - 运行状态: ${GREEN}active (正常运行/已挂载)${NC}"
+            else
+                echo -e "   - 运行状态: ${RED}$srv_status (异常或未启动)${NC}"
+            fi
+            echo -e "   - 开机自启: ${YELLOW}$srv_enabled${NC}"
+        else
+            echo -e "   - ${YELLOW}⚠️ 未检测到 log2ram.service 系统服务注册。${NC}"
+        fi
     else
-        echo -e "${GREEN}✅ /var/log 当前已成功挂载在内存 (tmpfs) 中：${NC}"
+        echo -e "   - ${YELLOW}当前系统不支持 systemctl。${NC}"
+    fi
+
+    echo -e "\n----------------------------------------"
+    # 2. 检查内存挂载点
+    if ! grep -q " /var/log " /proc/mounts; then
+        echo -e "💾 内存挂载检查: ${YELLOW}⚠️ 当前 /var/log 未挂载到内存中 (未启用)。${NC}"
+    else
+        echo -e "💾 内存挂载检查: ${GREEN}✅ /var/log 已成功挂载在内存中${NC}"
         df -h /var/log
     fi
 
     echo -e "\n----------------------------------------"
+    # 3. 检查 /var/log 目录占用大小
     echo -e "📁 内存日志目录占用详情 (/var/log):"
     du -sh /var/log 2>/dev/null
 
     echo -e "\n----------------------------------------"
-    # 尝试从持久化脚本中读取备份路径
+    # 4. 检查持久化备份目录及占用
     if [ -f "/usr/local/bin/log_to_ram.sh" ]; then
         bak_dir=$(grep "BACKUP_DIR=" /usr/local/bin/log_to_ram.sh | cut -d'"' -f2)
         if [ -n "$bak_dir" ] && [ -d "$bak_dir" ]; then
@@ -378,7 +401,6 @@ cmd_resize_ram() {
     fi
 
     echo "正在更新配置文件..."
-    # 替换 /usr/local/bin/log_to_ram.sh 中的内存盘大小
     sed -i "s|RAM_DISK_SIZE=\".*\"|RAM_DISK_SIZE=\"$NEW_SIZE\"|g" /usr/local/bin/log_to_ram.sh
 
     echo "正在重新挂载 /var/log 以应用新大小..."
@@ -401,7 +423,7 @@ while true; do
     echo -e "${BLUE}==============================================${NC}"
     echo -e "  [1] 检测内置 eMMC 健康度及寿命报告"
     echo -e "  [2] 一键优化 /var/log 目录 (Log-to-RAM 内存缓存)"
-    echo -e "  [3] 检查 Log-to-RAM 挂载状态与占用大小"
+    echo -e "  [3] 检查 Log-to-RAM 挂载状态、占用及服务健康状态"
     echo -e "  [4] 修改 Log-to-RAM 内存盘大小"
     echo -e "  [0] 退出工具箱"
     echo -e "${BLUE}----------------------------------------------${NC}"
